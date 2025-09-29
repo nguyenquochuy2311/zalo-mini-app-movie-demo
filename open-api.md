@@ -1,327 +1,540 @@
-Architecting Intelligent Agents on the Zalo Platform: A Comprehensive Technical Analysis
-Section 1: Deconstructing the Zalo API Ecosystem
-An intelligent agent's efficacy is contingent upon its ability to navigate and interact with its host environment. The Zalo platform, while powerful, presents a fragmented and multifaceted ecosystem that demands a clear architectural map before any development of sophisticated agents can commence. The primary challenge for architects and developers is the absence of a single, unified documentation portal, with critical information distributed across multiple domains. This section provides a synthesized, unified view of this landscape, clarifying the distinct platforms and establishing the foundational client-side versus server-side architectural dichotomy that governs all agent development on Zalo.
+# Zalo Mini App Open APIs Documentation
 
-1.1 A Unified View of a Fragmented Landscape
-To build a context-aware agent, a developer must draw upon resources from several distinct yet interconnected Zalo platforms. Each platform serves a specific purpose, and understanding their individual roles and how they interoperate is the first step in designing a coherent system architecture.
+This is a detailed summary and compilation of the content from the Zalo Mini App Open APIs documentation, based on the provided link (adjusted to the functional domain mini.zalo.me for complete access). The content has been translated to English, structured in Markdown, and includes all available sections, headings, text, code snippets, tables, and links. Additional research revealed sub-sections and related pages, which are incorporated here for fullness.
 
-Zalo Mini App Platform (mini.zalo.me): This is the core runtime environment for any user-facing component of an agent. It provides the client-side Zalo Mini App SDK (ZMP SDK), a comprehensive JavaScript library that enables the agent's front-end to interact directly with the Zalo native application on a user's device. This is the exclusive gateway to device hardware (camera, location services, NFC), native UI elements (toasts, navigation bars), and user-specific context that requires direct interaction and consent. The agent's "senses" and "limbs" are primarily defined by the capabilities of this SDK.
+## Table of Contents
 
-ZaloPay Platform (docs.zalopay.vn): This platform is the authoritative domain for all transactional functionalities. It is a dual-faceted system, offering both a client-side MiniApp SDK for embedding payment flows directly within the user interface and a separate, more extensive set of server-side OpenAPIs. These OpenAPIs are essential for the agent's backend to securely manage the entire financial lifecycle, including creating orders, processing refunds, managing disbursements, and handling merchant onboarding. Any agent tasked with commercial or financial operations will rely heavily on this platform.
+- [Overview](#overview)
+- [Getting API Key](#getting-api-key)
+- [Error Codes](#error-codes)
+- [Statistics](#statistics)
+- [Sending Notifications to Users](#sending-notifications-to-users)
+  - [Detailed Setup for Sending Messages](#detailed-setup-for-sending-messages)
+- [Partner Introduction](#partner-introduction)
+  - [Integration Process](#integration-process)
+  - [Setup Client](#setup-client)
+  - [Event Review Mini App](#event-review-mini-app)
+- [App Management Introduction](#app-management-introduction)
+- [App Management V2 Introduction](#app-management-v2-introduction)
+- [User Revocation of Consent and Data Deletion Events](#user-revocation-of-consent-and-data-deletion-events)
+  - [Open Endpoint Version](#open-endpoint-version)
+  - [Webhook Version](#webhook-version)
 
-Zalo AI Platform (ai.zalo.cloud): This platform extends the potential intelligence of an agent by offering a suite of proprietary AI services. These services, such as Text-to-Speech (TTS), are accessible via server-side API calls, authenticated using a distinct apikey. While the provided documentation offers limited detail on the full range of services, the platform's existence signifies a strategic opportunity to enhance an agent with officially supported, deeply integrated AI capabilities, creating a powerful synergy between the agent's logic and Zalo's own machine learning infrastructure.
+## Overview
 
-Official Account (OA) & General Developer Platform (developers.zalo.me): This domain serves as the administrative and strategic hub for developers. It is where developers register their applications to receive a Zalo App ID, manage permissions, and access the powerful Official Account (OA) APIs. The OA is a critical channel for an agent's proactive and asynchronous communication strategy, enabling it to send notifications, transactional updates, and engage with users outside the immediate context of the Mini App session.
+# Overview | Zalo Mini App
 
-1.2 The Client-Side vs. Server-Side Dichotomy
-The Zalo platform enforces a strict separation between client-side operations, which occur within the Mini App on the user's device, and server-side operations, which are executed by the developer's backend infrastructure. This separation is not merely a recommendation but a fundamental architectural constraint that dictates the design of any secure and scalable agent.
+[Jump to main content](#__docusaurus_skipToContent_fallback)
 
-Client-Side Operations (ZMP SDK): The APIs documented at mini.zalo.me and the payment-specific functions in the ZaloPay MiniApp SDK are invoked via JavaScript within the Mini App's sandboxed webview environment. Their primary function is to serve as a bridge to the native Zalo application and the underlying device hardware. This is the only way to access device-native features like 
+# Overview
 
-getLocation, scanQRCode, and vibrate, or to request user-specific information that requires an interactive, real-time consent prompt, such as getUserInfo or getPhoneNumber.
+This document guides the integration and usage of Zalo Mini App Open APIs. The document targets two main audiences:
 
-Server-Side Operations (Open APIs): These are standard RESTful APIs intended for secure backend-to-backend communication. This category includes the ZaloPay OpenAPIs for payment processing , the Zalo AI APIs , and the management APIs available to Solution Partners for programmatic app creation and deployment. These APIs are indispensable for executing business logic, processing sensitive data, integrating with third-party systems or databases, and performing secure operations that must never be exposed on the client. The emergence of unofficial libraries like the Python wrapper 
+### 1. Individuals or Businesses Independently Developing Mini Apps: [https://mini.zalo.me/documents/open-apis/#1-cá-nhân-hoặc-doanh-nghiệp-tự-phát-triển-mini-app-độc-lập]
 
-zlapi further underscores the necessity and demand for robust server-side automation and interaction capabilities.
+- Can self-register to create a Mini App and obtain an API Key directly, without going through a separate registration process.
+- Mainly supports basic features: setting up webhooks (with some basic events) and viewing statistics (stats) about their Mini App.
 
-This client-server division necessitates a hybrid architecture for any non-trivial agent. An agent's design cannot be monolithic; it must consist of at least two distinct components. The client-side Mini App acts as the agent's sensory-motor system, gathering local context and executing actions that require user interaction. The server-side application, in turn, functions as the agent's central nervous system or "brain," housing the core logic, performing complex computations, ensuring data persistence, and securely interfacing with both Zalo's backend services and the developer's own infrastructure. The official Coffee Shop tutorial, with its distinct client and server-api modules, serves as a canonical example of this mandatory hybrid model.
+### 2. Solution Partners Developing Mini Apps for Customers: [https://mini.zalo.me/documents/open-apis/#2-đối-tác-giải-pháp-phát-triển-mini-app-cho-khách-hàng]
 
-Furthermore, the Zalo App ID emerges as the lynchpin of this entire ecosystem. It is the central unit of identity and trust that connects a developer's assets across the fragmented platforms. The user identifiers returned by APIs like 
+- These are entities or businesses that have officially signed cooperation agreements with Zalo Mini App, granted extended access rights for large-scale management and automation.
+- Fully supported with advanced features: creating and managing a large number of Mini Apps, automated deployment and approval, full API integration, receiving webhooks with all types of events as required.
 
-getUserInfo are explicitly scoped to this App ID, meaning a user has a different ID for each Zalo application they interact with. This design choice makes the Zalo App ID the root of trust and the fundamental namespace for all user data, permissions, and context within a developer's domain. Consequently, an agent's entire operational scope is inextricably bound to its Zalo App ID, and any strategy involving multiple distinct agents would require the careful management of multiple Zalo App IDs, each with its own siloed user data and permission sets.
+### Getting Started: [https://mini.zalo.me/documents/open-apis/#bắt-đầu]
 
-Section 2: Foundational Capabilities for Agent Context-Awareness
-An intelligent agent's ability to act meaningfully is predicated on its capacity to perceive and understand its environment. The Zalo API ecosystem provides a rich set of tools that function as the agent's "senses," allowing it to build a comprehensive model of the user, the device, and the history of their interactions. Mastering these foundational APIs is essential for creating agents that are not merely reactive but genuinely context-aware.
+miniapp-logo
 
-2.1 User Identity and Profile APIs
-Understanding the user is the bedrock of personalization and effective agent design. Zalo provides a tiered set of APIs to establish and enrich the user's identity.
+Explore
+----------------------------------------------------------------------------------------------------
 
-Core Identity APIs: The primary instruments for user identification are getUserInfo, getUserID, and getPhoneNumber.
+## Getting API Key
 
-Deep Dive into getUserInfo: This is the most comprehensive endpoint for user profile data. The UserInfo data model it returns is exceptionally rich for building context. Beyond basic identifiers like 
+# Guide to Get API Key | Zalo Mini App
 
-id, name, and avatar, it includes crucial social and relational data points. The boolean followedOA indicates whether the user has followed the Mini App's linked Official Account, providing a key signal of user engagement. The idByOA field provides the user's specific identifier within the OA's context, which is essential for mapping the Mini App user to an OA follower for messaging purposes. Additionally, the isSensitive flag serves as a critical compliance signal, alerting the agent that the user may belong to a protected group requiring special data handling under local regulations.
+[Jump to content](#__docusaurus_skipToContent_fallback)
 
-The getPhoneNumber Security Flow: This API exemplifies Zalo's security-first approach to sensitive data. A client-side call to getPhoneNumber does not directly return the user's phone number. Instead, it returns a single-use, short-lived token after the user grants consent. This token must be passed to the agent's secure backend. The backend service then makes a server-to-server API call to Zalo, exchanging this 
+# Guide to Get API Key
 
-token, the user's access_token, and the application's secret_key for the actual phone number. This two-step, server-mediated flow ensures that the user's phone number is never exposed in the client-side environment, mitigating the risk of data leakage.
+To interact and use the Open APIs, you need to set up an API Key for your Zalo App. Please follow the instructions below to get an API Key:
 
-Evolving Permission Model: Access to user data is governed by a nuanced and evolving permission model. A significant change was introduced with ZMP SDK version 2.35.0. The 
+my-zalo-apps
 
-getAccessToken call, which is fundamental for authentication, is now granted automatically without a user prompt. However, this default token is restricted and only sufficient to retrieve the user's id. To access personally identifiable information (PII) such as the user's name and avatar, the agent must make a separate, explicit call to the authorize API with the scope.userInfo permission. Alternatively, the 
+* Then select Open APIs.
 
-getUserInfo function can be called with the autoRequestPermission: true parameter, which will trigger the necessary consent dialog. This tiered permission system is a critical consideration for the agent's onboarding flow, requiring a strategy that requests elevated permissions only when necessary, thereby building user trust.
+my-apps
 
-2.2 Environmental and Device Context
-To be truly effective, an agent must be aware not only of the user but also of their physical and digital environment. The ZMP SDK provides a suite of APIs for gathering this situational context.
+* In the API Management section, set up the following information:
 
-Location Services: The getLocation API allows the agent, with user consent, to retrieve the device's current geographical coordinates. This is fundamental for enabling a wide range of location-based services, from local search and recommendations to logistics and delivery tracking.
+  * IP Access: you must declare the IP Server or Gateway of yours to access these APIs.
+  * Webhook URL: to receive notifications when there are changes related to the Mini App.
+  * Scopes: The scope you want the API to interact with:
 
-System and Device Information: The getSystemInfo and getDeviceIdAsync APIs provide a snapshot of the user's technical environment. This includes the device model, operating system, screen dimensions, and a unique device identifier. An agent can leverage this data to tailor its user interface for optimal display on different screen sizes or to enable device-specific features.
+  * apps.send.notification: allows sending notifications to users via the common OA of Zalo Mini App.
+  * apps.get.stats: Allows retrieving statistics of the Mini App.
 
-Network Awareness: The getNetworkType API and the onNetworkStatusChange event listener equip the agent with real-time knowledge of the user's connectivity status (e.g., WiFi, 4G, offline). This is crucial for performance optimization. A network-aware agent can make intelligent decisions about its behavior, such as deferring the download of large assets on a slow mobile connection or pre-caching data when on a stable WiFi network to ensure a smooth offline experience.
+* Then select Update, the system will create an API Key corresponding to the information you have set up.
 
-2.3 State Persistence and Knowledge Management (Native Storage)
-For an agent to provide a continuous and coherent experience, it needs a form of memory. Zalo's Native Storage provides a client-side mechanism for this purpose.
+manage-apis
+----------------------------------------------------------------------------------------------------
 
-Storage Mechanism: The platform offers a simple, synchronous key-value storage system accessible via the nativeStorage module. The modern API set consists of 
+## Error Codes
 
-setItem, getItem, removeItem, clear, and getStorageInfo. It is important to note that an older set of asynchronous APIs (setStorage, getStorage) are now deprecated and should be avoided in new development.
+# Error Codes | Zalo Mini App
 
-Core Operations: The setItem and getItem functions are the primary methods for an agent to store and retrieve information across user sessions. As it is a string-based storage, complex objects or arrays must be serialized, typically using JSON.stringify, before being stored with setItem. Conversely, retrieved data must be deserialized with JSON.parse. The documentation strongly advises wrapping JSON.parse calls in try/catch blocks to gracefully handle cases where data is missing or corrupted, preventing potential application crashes.
+[Chuyển tới nội dung chính](#__docusaurus_skipToContent_fallback)
 
-Application for Agents: This client-side storage serves as the agent's short-term, high-speed memory. It is ideal for caching user preferences, storing recent search queries, maintaining the state of a shopping cart, or tracking progress through a multi-step workflow. The code examples provided in the Zalo Mini App blog offer a clear and practical implementation pattern for all essential storage operations.
+# Error Codes
 
-Managing Storage Constraints: Native Storage is a finite resource. The documentation for the deprecated setStorage API notes that if the memory limit is reached, the oldest data will be deleted, implying a Least Recently Used (LRU) eviction policy. The 
+Table describing error codes when integrating APIs
 
-getStorageInfo API allows a well-behaved agent to be aware of these constraints by returning the currentSize and limitSize of the storage in kilobytes. An agent should monitor its storage usage to avoid unexpected data loss and to implement intelligent caching strategies. This confirms that Native Storage should be treated as a performance-enhancing cache, not as a durable, permanent database. Critical information, such as completed transactions or core user profile data, must be synchronized with the agent's backend server to ensure persistence.
+| Value | Description                          |
+|-------|--------------------------------------|
+| -100  | Required parameters wasn't present   |
+| -101  | Invalid parameters                   |
+| -102  | Invalid Api Key                      |
+| -103  | Too many requests                    |
+| -104  | Authentication is required           |
+| -107  | Failed                               |
+| -108  | App ID is invalid                    |
+| -109  | Out of Quota                         |
+| -110  | Invalid User Id                      |
+| -111  | Invalid request. Your app is currently unable to send notifications to this user |
+| -112  | Invalid scope                        |
+| -113  | Invalid IP                           |
+| -114  | Invalid Mini App Id                  |
+| -115  | Partner is invalid                   |
+| -116  | Partner Api Key is invalid           |
+| -117  | The file upload has exceeded the limit for file size |
+| 0     | Success                              |
 
-The following table provides a consolidated matrix of these foundational APIs, mapping their function to the specific contextual knowledge they provide for an agent.
+miniapp-logo
 
-Table 2.1: Context-Awareness API Matrix
+Khám phá
+----------------------------------------------------------------------------------------------------
 
-Section 3: Core Action and Interaction APIs
-An agent's value is realized through its ability to act upon the context it has gathered. The Zalo platform provides a rich vocabulary of action-oriented APIs that serve as the agent's "hands and voice." These tools enable the agent to engage in conversations, interact with the Zalo social graph, and execute complex transactions, transforming it from a passive data processor into an active participant in the user's digital journey.
+## Statistics
 
-3.1 Conversational and Notification Interfaces
-Effective communication is central to any intelligent agent. Zalo offers several distinct channels for an agent to interact with users, each suited for different purposes.
+# Statistics
 
-Direct, User-Initiated Interaction (openChat): This API is a powerful tool for initiating a one-on-one conversation, either with the user directly or with a designated Official Account. Its most significant feature for an agent is the 
+Used to collect statistical information of a Mini App within a specific time period.
 
-message parameter, which allows the agent to pre-fill the chat input box with a contextually relevant message. For example, an e-commerce agent could prompt, "I see you're looking at the new running shoes. Would you like to know more about their features?" This capability allows the agent to seamlessly transition the user from a browsing context to a conversational one. Importantly, the user retains full control and must explicitly tap "send" to dispatch the pre-filled message, a design choice that respects user autonomy and prevents spam.
+### Parameters [](https://mini.zalo.me/documents/open-apis/open/stats/#parameters)
 
-Proactive, Asynchronous Notifications (requestSendNotification): This API is the gateway for an agent to earn the privilege of sending proactive messages. Calling this function triggers a native Zalo consent prompt, asking the user for permission to receive notifications from the Mini App's associated Official Account (OA). Once this one-time permission is granted, the agent's backend is authorized to use the OA APIs to send transactional or customer service messages via the Zalo Notification Service (ZNS). This channel is essential for any asynchronous communication, such as order status updates, appointment reminders, or alerts that need to reach the user even when they are not actively using the Mini App.
+| Field        | Type   | Example              | Required | Description                                                  |
+|--------------|--------|----------------------|----------|--------------------------------------------------------------|
+| miniAppId    | long   | 3595174957789840753  | true     | ID of the corresponding Mini App                              |
+| type         | string | access-traffic       | true     | Type of statistical data to retrieve, refer to StatsType list below |
+| startTime    | long   | 1692032400000        | true     | Start time for data retrieval                                 |
+| endTime      | long   | 1692032400000        | true     | End time for data retrieval                                   |
+| utmSource    | string | all                  |          | Only required with certain type parameters                   |
+| utmCampaign  | string | all                  |          | Only required with certain type parameters                   |
+| os           | string | all                  |          | Only required with certain type parameters                   |
 
-Rich Content and Viral Sharing (openShareSheet): This is one of the most versatile APIs for agent-driven actions, providing a bridge to Zalo's native social fabric. Invoking this function opens the standard Zalo sharing interface, which the agent can pre-populate with a wide variety of content types. The API supports sharing simple 
+**Note:**
 
-text, image URLs, and external links. More powerfully for ecosystem growth, it supports sharing a deep link directly back to a specific page within the Mini App itself, using the zmp or zmp_deep_link types. This allows an agent to facilitate viral loops, for instance, by prompting a user who has just achieved a milestone to "Share your result with friends!" The detailed data models available for each share type provide immense flexibility for crafting compelling, shareable content.
+* The data retrieval period is within 90 days.
+* startTime, endTime are in milliseconds.
+* startTime must be at 0:00 (UTC+7) of the day to retrieve.
+* endTime can be any value within the day, the system will automatically round to the end of the day.
 
-3.2 Social Graph and Engagement APIs
-Zalo is fundamentally a social platform, and effective agents must be able to leverage its social graph to create more engaging and connected experiences.
+### Return Value [](https://mini.zalo.me/documents/open-apis/open/stats/#return-value)
 
-Viewing Profiles (openProfile): This API provides a simple but effective way for an agent to direct the user's attention to another entity within the Zalo ecosystem. It can be used to open the profile of another Zalo user or an Official Account. This could be used to facilitate connections between users or to provide more detailed information about a business or partner OA.
+| Attribute | Type   | Description                          |
+|-----------|--------|--------------------------------------|
+| err       | number | Success / failure                    |
+| msg       | string | Success / failure                    |
+| data      | object | Successful data (if available)       |
 
-Friend Selection (openProfilePicker): This API offers a deeper level of social integration. It opens a native UI that allows the user to select one or more friends from their contact list, up to a specified maxProfile limit. Upon selection, the API returns an array of 
+### Sample Code [](https://mini.zalo.me/documents/open-apis/open/stats/#sample-code)
 
-PickedProfile objects to the agent, containing each selected friend's unique id, name, and avatar URL. This is a powerful primitive for building a wide range of social features. An agent could use it to implement functionality for inviting friends to an event, sharing a shopping cart with a specific person for collaborative purchasing, or creating small, private groups within the Mini App's context.
+Code demo fallback when rendering server side!
 
-Official Account (OA) Integration: The relationship between the Mini App and its associated OA is a cornerstone of the Zalo ecosystem. The APIs followOA and unfollowOA allow an agent to directly prompt a user to manage this relationship from within the Mini App. The 
+## Error Code [](https://mini.zalo.me/documents/open-apis/open/stats/#error-code)
 
-interactOA API provides another mechanism for triggering specific interactions with the OA. These tools enable the agent to create a seamless and integrated experience, blurring the lines between the interactive Mini App and the business's primary communication and retention channel on Zalo.
+Refer [here](https://mini.zalo.me/documents/open-apis/errorCode/)
 
-3.3 Transactional Capabilities: Payments and Verification
-For agents operating in commercial, financial, or other high-trust domains, Zalo provides robust APIs for handling payments and verifying user identity.
+## StatsType [](https://mini.zalo.me/documents/open-apis/open/stats/#statstype)
 
-Payment Orchestration (ZaloPay): The payment flow is orchestrated through the ZaloPay Checkout SDK, with the createOrder API being the central client-side function. The process is secure and involves close coordination between the agent's client and backend. First, the agent's backend creates an order in its own system and generates a secure Message Authentication Code (
+### utm-sources [](https://mini.zalo.me/documents/open-apis/open/stats/#utm-sources)
 
-mac) using its private key and the order data. This information is passed to the client, which then calls createOrder. This action redirects the user to the native ZaloPay payment interface to securely complete the transaction. The agent must then handle the payment result, which is delivered via a server-side callback and can also be queried proactively from the client using a checkTransaction API.
+Definition: List of utm sources of the mini app.
 
-Identity Verification (eKYC): For services that require stringent identity verification, Zalo offers a comprehensive, multi-step eKYC (Electronic Know Your Customer) API suite. This is an entirely server-side workflow that an agent's backend must orchestrate. The process typically involves generating a unique session ID, instructing the user (via the Mini App UI) to upload images of their identity documents, and then polling a series of endpoints to retrieve the results of various automated checks, including Optical Character Recognition (OCR) on the ID card, Face Matching between the ID photo and a user selfie, and Fraud Checking against known databases. An agent designed for financial services, government interactions, or other regulated industries would need to implement this entire complex workflow to comply with legal requirements.
+### access-traffic [](https://mini.zalo.me/documents/open-apis/open/stats/#access-traffic)
 
-The design of these action-oriented APIs reveals a core principle of the Zalo platform: user control. An agent on Zalo cannot act with full autonomy. Nearly every significant action—sending a message with openChat, sharing content via openShareSheet, or authorizing a payment with createOrder—requires the user to perform the final, decisive tap. The agent's role is not that of an autonomous executor but rather a "smart concierge." Its intelligence is demonstrated by preparing and contextualizing actions, making it as simple as possible for the user to understand the proposed action and grant consent. The agent's success hinges on what it suggests and when, not on its ability to act unilaterally.
+Definition: Statistics of the mini app's access sources.
 
-Section 4: Authentication, Governance, and Security
-Developing a robust and compliant agent on a third-party platform necessitates a profound understanding of its governance framework, including its security models, operational constraints, and review processes. This section provides a detailed analysis of the Zalo platform's governance layer, covering the authentication and authorization flow, critical platform policies and limitations, and the submission and review process that every Mini App must navigate before release.
+Corresponding chart:
 
-4.1 The Access Token and Authorization Flow
-Authentication is the cornerstone of secure agent-user interaction, establishing a trusted identity for every API call.
+stats-access
 
-The getAccessToken API: This function is the primary mechanism for authenticating a user within the Mini App. It returns an 
+### traffic-by-sources [](https://mini.zalo.me/documents/open-apis/open/stats/#traffic-by-sources)
 
-accessToken, a JSON Web Token (JWT), which encapsulates the user's identity in the specific context of that Zalo App. This token is the essential credential that the Mini App client must send to the agent's backend with every request, allowing the backend to securely identify the user.
+Definition: Statistics of access sources by utm sources.
 
-The Post-SDK v2.35.0 Policy Shift: A critical evolution in the platform's privacy model occurred with SDK version 2.35.0. Prior to this update, any call to 
+Corresponding chart:
 
-getAccessToken would trigger a user consent prompt. The current implementation, however, automatically returns a token without user interaction. This change streamlines the initial user experience but comes with a significant restriction: this default, consent-less token is a low-privilege credential. It is only sufficient for the backend to retrieve the user's unique, app-scoped 
+stats-traffic-by-sources
 
-userID.
+### platform [](https://mini.zalo.me/documents/open-apis/open/stats/#platform)
 
-Explicit Authorization for Elevated Permissions: To access more sensitive, personally identifiable information (PII) such as the user's name and profile picture, the agent must explicitly request elevated permissions. This is achieved by calling the authorize API with the appropriate scope, such as authorize({ scope: 'scope.userInfo' }). This action presents the user with a native consent dialog. This creates a clear, two-tiered permission system that an agent's logic must navigate: a default, low-privilege state for basic identification and an elevated, user-consented state for personalized interactions.
+Definition: Statistics by operating system.
 
-Backend Token Validation: It is imperative that the agent's backend does not blindly trust the accessToken received from the client. The backend should use Zalo's server-side APIs to validate the token's signature and retrieve the authoritative user profile associated with it. This server-to-server validation step is crucial to ensure the token is authentic and has not been tampered with, protecting against impersonation attacks.
+Corresponding chart:
 
-4.2 Platform Policies and Constraints
-An agent must operate within a strict set of rules and limitations imposed by the Zalo platform to ensure stability, fairness, and security for all users.
+stats-platform
 
-API Rate Limits and Throttling: The ZaloPay API documentation explicitly defines a rate-limiting mechanism. When an application exceeds its allotted request quota, the API will respond with an HTTP status code 429 Too Many Requests and a specific error payload containing code: -429 and short description: LIMIT_REQUEST_REACH. This error is documented for high-frequency operations such as creating orders, querying order status, and processing refunds. The prescribed mitigation strategy is to "recreate the request after a certain period of time," which indicates a time-window-based throttling policy (e.g., requests per minute). A resilient agent must be designed to handle this 
+### age [](https://mini.zalo.me/documents/open-apis/open/stats/#age)
 
-429 response gracefully, typically by implementing an exponential backoff-and-retry strategy.
+Definition: Statistics by age.
 
-User-Centric Interaction Limits: In addition to server-side rate limits, the platform also enforces limits on user-facing interactions to prevent developer abuse and user annoyance. For instance, the getPhoneNumber API has a hard limit of three rejections by a user within a single session. After the third denial, the API will fail automatically without prompting the user again. This forces the agent to be judicious in its requests for sensitive permissions.
+### gender [](https://mini.zalo.me/documents/open-apis/open/stats/#gender)
 
-Comprehensive Error Handling: The platform provides a detailed list of error codes that can be returned by the SDK and APIs. A production-grade agent must implement robust error handling to manage these scenarios. This includes not only technical errors like rate limiting but also user-driven events, such as the 
+Definition: Statistics by gender.
 
--2003 User cancel error returned when a user dismisses the openProfilePicker UI. The recommended practice for handling these promise-based API calls is to use modern JavaScript 
+Corresponding chart:
 
-async/await syntax within try/catch blocks for clear and linear error management.
+stats-age
 
-Data Privacy and Content Policies: All development must adhere to Zalo's comprehensive legal and content policies. The platform's privacy policy dictates that developers must obtain explicit user consent before accessing sensitive data like phone contacts or location. The Zalo Mini App Censorship Policy is even more prescriptive, outlining strict rules for application content, naming, and branding. Mini Apps are forbidden from using misleading logos or names, promoting illegal content, or functioning primarily as a means to redirect users to an external, standalone application. These policies are designed to protect users and maintain the integrity of the Zalo ecosystem.
+### avg-used-time [](https://mini.zalo.me/documents/open-apis/open/stats/#avg-used-time)
 
-4.3 The Submission and Review Gauntlet
-Before an agent can be made available to the public, its encapsulating Mini App must pass a rigorous review process.
+Definition: Statistics of average usage time.
 
-The Development and Submission Lifecycle: The standard workflow follows a clear, multi-stage path: local development and previewing, deploying a "Testing" version to the Zalo platform, submitting that version for formal review, and finally, upon approval, releasing it to the public. The formal review process is stated to take up to 72 working hours.
+### used-time [](https://mini.zalo.me/documents/open-apis/open/stats/#used-time)
 
-Strict Review Criteria: The review process is not a mere technical check for bugs; it is a comprehensive functional and policy compliance audit. Key criteria include:
+Definition: Statistics of usage time.
 
-Brand and Content Consistency: The Mini App's name, logo, and description must be consistent, accurately reflect its functionality, and not infringe on any third-party trademarks.
+Corresponding chart:
 
-User Experience (UX) and Performance: The application must provide a clean, intuitive user interface and a smooth experience. It must be free of crashes and must meet Zalo's standards for performance and load times.
+stats-used-time
 
-Justification of API Usage: Developers must request permission to use sensitive APIs, and these requests will only be approved if the Mini App demonstrates a clear, legitimate, and user-facing purpose for that access.
+miniapp-logo
 
-Authentication Standards: The Mini App must use the official Zalo Profile for all user login and account linking functionalities.
+Explore
+----------------------------------------------------------------------------------------------------
 
-Special Considerations and Workarounds:
+## Sending Notifications to Users
 
-Regulated Industries: Mini Apps operating in specialized or regulated fields such as pharmaceuticals, cosmetics, finance, or government services are subject to a higher level of scrutiny. They must undergo an additional verification process that requires the submission of legal documents, business licenses, and other relevant certifications.
+# Sending Notifications to Users | Zalo Mini App
 
-The Payment Integration Paradox: A common procedural hurdle arises from the fact that integrating ZaloPay often requires a live, published Mini App, yet a Mini App with a non-functional payment feature may be rejected. The officially sanctioned workaround for this is to first submit the Mini App for review as an "Internal" application. An internal app is not publicly discoverable but is accessible via a direct QR code or deeplink. The developer can share this internal version with the ZaloPay team to complete the integration. Once payment functionality is fully implemented and tested, the developer must submit a new version for review, this time requesting it be categorized as "External" for public release. This procedural nuance is critical for any agent with transactional capabilities.
+[Jump to main content](#__docusaurus_skipToContent_fallback)
 
-The platform's governance structures have profound implications for agent design. An agent's core logic must be developed defensively, incorporating strategies like exponential backoff for rate-limited APIs and stateful tracking of permission requests to avoid violating user-centric limits. The review process itself should be treated as a business proposal, not a simple technical deployment. The "Version description" field in the submission form is a critical channel for communicating the agent's purpose and justifying its API needs to the human reviewers at Zalo.
+# Sending Notifications to Users
 
-Section 5: Strategic Implementation Patterns for Intelligent Agents
-The preceding analysis has deconstructed the Zalo API ecosystem and its governing policies. This final section synthesizes that knowledge into actionable architectural blueprints. These patterns provide strategic templates for building specific types of intelligent agents, demonstrating how to orchestrate the necessary APIs in a manner that is both effective and compliant with the platform's constraints.
+Your Zalo Mini App can send notifications to users through the Zalo Official Account (Zalo OA) system.
 
-5.1 Architectural Blueprint for a Conversational Agent (Customer Service Bot)
-Objective: To create an agent capable of engaging in natural language conversations to resolve user queries, provide automated support, and guide users through simple tasks, thereby reducing the load on human support staff.
+See the detailed initial setup steps [here](https://mini.zalo.me/documents/intro/send-message-oa-to-user/).
 
-Core Components & API Orchestration:
+There are two Zalo OA channels you can use:
 
-Frontend (Mini App): The user interface is centered around a chat component. The primary entry point for a conversation is a UI element (e.g., a "Help" button) that triggers the openChat API. Before opening the chat, the agent can call 
+* Business Zalo OA
+* Zalo OA “Zalo Mini App”
 
-getUserInfo to retrieve the user's name, allowing for a personalized greeting like, "Hello [User Name], how can I assist you today?".
+Custom tab fallback when rendering server side!
 
-State Management: To create a seamless conversational experience, client-side nativeStorage is used to cache the conversation history. If the user navigates away from the chat and then returns, the agent can use 
+miniapp-logo
 
-getItem to reload the previous messages, providing continuity.
+Explore
+----------------------------------------------------------------------------------------------------
 
-Backend (Server): This component serves as the agent's "brain." It exposes an endpoint that the Mini App client calls to send user messages. This backend service integrates with a Natural Language Processing (NLP) engine (such as a third-party service like Google Dialogflow or a custom-trained model) to perform intent recognition and entity extraction on the user's input.
+### Detailed Setup for Sending Messages
 
-Logic and Integration: The backend uses the accessToken sent from the client to securely identify the user. Based on the recognized intent, it executes the appropriate business logic. This may involve querying an internal knowledge base, looking up order details in a database, or calling other Zalo Open APIs. The generated response is then sent back to the client to be rendered in the chat UI.
+# Sending Notifications to Users
 
-Proactive Engagement: During the conversation, the agent can identify opportunities to request permissions for future engagement. For example, after resolving an issue, it might ask, "Would you like me to notify you with updates about your case?" If the user agrees, the client calls requestSendNotification. With this permission granted, the backend can later use the Official Account API to send asynchronous follow-up messages.
+[Skip to main content](#__docusaurus_skipToContent_fallback)
 
-5.2 Framework for a Proactive E-commerce Agent (Personal Shopper)
-Objective: To create an agent that acts as a personal shopper, guiding users through product discovery, managing a shopping cart, and streamlining the checkout process, while providing personalized recommendations to increase conversion rates.
+# Sending Notifications to Users
 
-Core Components & API Orchestration:
+To enhance quick and convenient interaction between users and businesses, the platform has introduced the benefit of sending notifications via Zalo Official Account (OA) to users who have interacted with Mini Apps.
 
-Context Gathering: Upon application launch, the agent immediately begins building context. It calls getUserInfo for personalization and uses getItem to retrieve the user's browsing history or previously saved preferences from nativeStorage. It may also request 
+**Note**  
+This benefit applies to partners meeting the conditions below. Currently, the policy is under trial.
 
-getLocation to tailor results by showing product availability at nearby physical stores.
+## 1. Applicable Objects [](/documents/intro/send-message-oa-to-user/#1-đối-tượng-áp-dụng)
 
-Product Discovery and UI: The agent's main interface displays product listings fetched from its backend. The UI is constructed using the officially provided ZaUI component library to ensure a native look and feel and to accelerate development, as demonstrated in the various official templates.
+Partners receive the benefit of sending notifications when users interact with Mini Apps, provided the business deploying the Mini App meets the platform's standards, including:  
+- Meets censorship conditions (details [here](https://mini.zalo.me/documents/zalo-mini-app-censorship-policy))  
+- Meets performance conditions (details [here](https://mini.zalo.me/blog/huong-dan-cai-thien-hieu-suat-lcp-cho-zalo-mini-app-2/))  
+- Verified by OA (details [here](https://mini.zalo.me/blog/thong-bao-huong-dan-xac-thuc-mini-app-qua-zalo-oa/))
 
-Client-Side Cart Management: To ensure a highly responsive and fast user experience, the shopping cart is managed entirely on the client side. When a user adds or removes an item, the agent updates a 'cart' object in nativeStorage using setItem. This approach avoids the network latency of a server call for every cart modification and ensures the cart's state persists even if the user closes and reopens the Mini App.
+## 2. Conditions for Receiving Benefits [](/documents/intro/send-message-oa-to-user/#2-điều-kiện-nhận-quyền-lợi)
 
-Secure Checkout Flow: When the user initiates checkout, the agent reads the final cart state from nativeStorage and sends it to its backend. The backend validates the cart, calculates totals, creates a secure order record in its database, and generates the necessary parameters for payment. These parameters are returned to the client, which then calls the createOrder function from the ZaloPay Checkout SDK to hand off the user to the secure, native ZaloPay payment interface.
+Users perform one of the following actions in the Mini App:
 
-Post-Purchase Communication: Upon receiving a successful payment confirmation via a server-side callback from ZaloPay, the agent's backend leverages the previously acquired notification permission to send a detailed order confirmation and receipt to the user via the Official Account API.
+| STT | Action | Scope of Application | Effective Time |
+|-----|--------|----------------------|----------------|
+| 1   | Scan QR code to access F&B Mini App via Zalo Camera | - F&B Mini App | From 1/7/2024 |
+| 2   | Click a button for the purpose of transaction payment (e.g., "Pay", "Call a car", "Book a car",...) and see payment methods in the bottom sheet of Checkout SDK | - Mini Apps of all industries and fields<br>- Mini Apps successfully integrated with Checkout SDK (applies from version 2.39.5)<br><br>Checkout SDK documentation [here](https://mini.zalo.me/documents/payment) | From 1/7/2024 |
+| 3<br><br>New | Click functionButton in Mini App. FunctionButton must be one of the following fixed templates:<br><br>- Payment<br>- Order food<br>- Book a car<br>- Place an order<br>- Buy tickets<br>- Booking<br>- Reserve a seat<br>- Create an order<br>- Pre-order<br>- Shop<br>- Schedule<br>- Lookup<br>- Check | - Mini Apps of all industries and fields<br><br>FunctionButton documentation [here](https://mini.zalo.me/documents/api/showFunctionButtonWidget/) | From 16/4/2025 |
 
-5.3 Model for a Service-Oriented Agent (Appointment Booker/Notifier)
-Objective: To automate the process of booking and managing appointments for a service-based business (e.g., a medical clinic, salon, or consultancy), including sending timely reminders to reduce no-shows.
+See detailed installation guide [here](https://mini.zalo.me/pages/tin-mini-app/tich-hop-va-cai-dat-tin-mini-app/). Notifications and installation guides for upcoming conditions will be sent to partners via Zalo OA Mini App - Partners and the website [mini.zalo.me](https://mini.zalo.me/).
 
-Core Components & API Orchestration:
+## 3. Benefit Details [](/documents/intro/send-message-oa-to-user/#3-nội-dung-quyền-lợi)
 
-Efficient Onboarding: The agent's first interaction is designed for maximum efficiency. It uses getUserInfo and the secure getPhoneNumber flow to pre-fill the booking form with the user's name and contact number, minimizing manual data entry. Concurrently, it calls 
+Partners meeting the conditions will receive the following benefits:  
+- Send notifications via the Consultation/Transaction message mechanism of Zalo OA (details [here](https://developers.zalo.me/docs/official-account/tin-nhan/tong-quan))  
+- When using the Consultation message mechanism, partners can choose from the following sending formats:  
+  - Current formats: Free text, images, forms, stickers, files  
+  - Mini App message format (new): Template messages optimized for notification needs based on specific industries  
 
-requestSendNotification, presenting a clear and compelling value proposition: "Allow notifications to receive important reminders about your upcoming appointments".
+**Note**  
+- All formats using the Consultation message mechanism will follow the same quota and fee calculation mechanism, see details [here](https://oa.zalo.me/home/resources/news/thong-bao-chinh-sach-gui-tin-va-quy-dinh-phi-gui-tin_1433049880779375099).  
+- The Mini App message format can only be used when users have interacted with the Mini App.
 
-Booking and Confirmation: The user selects a desired service, date, and time from an interface populated with availability data from the agent's backend. Upon submission, the backend validates the time slot, confirms the booking in its database, and sends an immediate confirmation back to the client.
+![image1]  
+Figure 1: Mini App message template format  
 
-Social Engagement: After a successful booking, the agent can foster social engagement. It might use openShareSheet to present an option like, "Share your appointment with a friend?". For returning customers, it could use the 
+![image2]  
+Figure 2: Example of quota and fee calculation mechanism for Consultation messages (Current format and Mini App message format)
 
-addRating API to prompt for feedback on their previous service experience.
+## 4. Template List [](/documents/intro/send-message-oa-to-user/#4-danh-sách-template)
 
-Asynchronous Backend Logic: The core of the agent's proactive value lies in its backend. This server runs scheduled tasks (e.g., using cron jobs) that periodically scan the appointments database. For example, 24 hours and again 1 hour before a scheduled appointment, the backend automatically triggers a reminder message sent to the user via the Official Account API.
+A list of message templates optimized for the F&B and E-commerce sectors. Partners not belonging to these two sectors can still choose templates suitable for their context and purpose. The platform will update additional templates and sectors in the future.
 
-Seamless OA Integration: The agent can further enhance the experience by using the interactOA API to provide quick actions or information directly within the OA chat environment, creating a fully integrated service loop between the interactive Mini App and the persistent communication channel.
+## Partner Introduction
 
-The following table summarizes these architectural patterns, providing a high-level strategic comparison for architects and product managers.
+# Introduction | Zalo Mini App
 
-Table 5.1: Agent Implementation Pattern Matrix
+[Go to main content](#__docusaurus_skipToContent_fallback)
 
-Appendix: Comprehensive Zalo Mini App API Reference Table
-This appendix serves as a consolidated, quick-reference guide to the client-side Zalo Mini App (ZMP) SDK APIs identified from the available documentation. Given the fragmented nature of the official resources, this table provides a unified view for developers, organized by functional category.
+# Introduction
 
-Table A.1: Zalo Mini App Client-Side SDK API Reference
+This document guides partners who need to automate the management and development of Mini Apps by integrating server-to-server APIs.
 
-Category	Sub-Group	API Function	Description	Source(s)
-Basic	-	getAppInfo	Retrieves basic information about the Mini App.	
-Basic	-	getContextAsync	Retrieves context information about the Zalo App environment.	
-Basic	-	getDeviceIdAsync	Retrieves a unique identifier for the device.	
-Basic	-	getSystemInfo	Retrieves information about the user's device and system.	
-Routing	-	closeApp	Closes the current Mini App.	
-Routing	-	getRouteParams	Retrieves parameters passed to the current route.	
-Routing	-	openMiniApp	Opens another Zalo Mini App.	
-Routing	-	openWebview	Opens a webview within the Zalo App.	
-Routing	-	sendDataToPreviousMiniApp	Sends data back to the Mini App that opened the current one.	
-Storage	-	setItem	Stores a key-value pair in the user's device cache (synchronously).	
-Storage	-	getItem	Retrieves a value by its key from the device cache (synchronously).	
-Storage	-	removeItem	Removes a key-value pair from the device cache.	
-Storage	-	clear	Clears all data from the device cache.	
-Storage	-	getStorageInfo	Retrieves information about the storage usage and limits.	
-UI	Feedback	showToast	Displays a short-lived notification message (toast).	
-UI	Feedback	closeLoading	Closes the initial loading splash screen.	
-UI	View	configAppView	Configures the appearance of the app view.	
-UI	View	setNavigationBarTitle	Sets the title text in the navigation bar.	
-UI	View	setNavigationBarColor	Sets the background color of the navigation bar.	
-UI	View	setNavigationBarLeftButton	Configures the left button in the navigation bar.	
-UI	Keyboard	hideKeyboard	Hides the on-screen keyboard.	
-Location	-	getLocation	Retrieves the current geographical location of the user.	
-Media	Camera	createCameraContext	Creates a context for managing the camera.	
-Media	Camera	requestCameraPermission	Requests permission from the user to access the camera.	
-Media	Camera	checkZaloCameraPermission	Checks the current camera permission status.	
-Media	File	chooseImage	Opens the gallery for the user to select an image.	
-Media	File	openMediaPicker	Opens the gallery for the user to select various media types.	
-Media	File	saveImageToGallery	Saves an image to the device's photo gallery.	
-Media	File	saveVideoToGallery	Saves a video to the device's video gallery.	
-Media	File	downloadFile	Downloads a file from a remote URL to the device.	
-Media	File	openDocument	Opens a document file (e.g., PDF).	
-User	Authorization	authorize	Requests specific API usage permissions from the user.	
-User	User information	getAccessToken	Retrieves the user's authentication token.	
-User	User information	getUserInfo	Retrieves the user's profile information (ID, name, avatar).	
-User	User information	getUserID	Retrieves the unique user ID for the application.	
-User	User information	getPhoneNumber	Retrieves a token to securely get the user's phone number.	
-User	Setting	getSetting	Retrieves the user's current settings information.	
-Device	Scan	scanQRCode	Opens the camera to scan a QR code.	
-Device	Network	getNetworkType	Gets the current network connection type (e.g., wifi, 4g).	
-Device	Network	onNetworkStatusChange	Listens for changes in the network connection status.	
-Device	NFC	checkNFC	Checks if the device supports NFC.	
-Device	NFC	scanNFC	Initiates an NFC scan.	
-Device	Contact	openPhone	Opens the device's native phone dialer with a number.	
-Device	Contact	openSMS	Opens the device's native SMS application with a number.	
-Device	Screen	keepScreen	Prevents the device screen from turning off.	
-Device	-	vibrate	Activates the device's vibration.	
-Device	Biometric Auth	checkStateBioAuthentication	Checks the status of biometric authentication availability.	
-Device	Biometric Auth	openBioAuthentication	Opens the biometric authentication interface.	
-Permission	-	requestSendNotification	Requests user permission to send notifications via the OA.	
-Permission	-	openPermissionSetting	Opens the user's permission settings page for the Mini App.	
-Zalo	-	openChat	Opens a chat window with a user or Official Account.	
-Zalo	-	openProfile	Opens the profile page of a user or Official Account.	
-Zalo	-	openProfilePicker	Opens a friend selector UI.	
-Zalo	-	openShareSheet	Opens the native Zalo sharing interface.	
-Zalo	-	followOA	Prompts the user to follow the linked Official Account.	
-Zalo	-	unfollowOA	Prompts the user to unfollow the linked Official Account.	
-Zalo	-	interactOA	Initiates an interaction with the Official Account.	
-Zalo	-	addRating	Prompts the user to add a rating for the Mini App.	
-Zalo	-	favoriteApp	Prompts the user to add the Mini App to their favorites.	
-Zalo	-	createShortcut	Prompts the user to create a home screen shortcut for the Mini App.	
-Zalo	-	minimizeApp	Minimizes the current Mini App.	
-Zalo	-	openPostFeed	Opens the interface to post on the user's feed (Nhật ký).	
-Zalo	-	requestUpdateZalo	Prompts the user to update their Zalo application.	
-Zalo	-	viewOAQr	Displays the QR code for the linked Official Account.	
-Advertising	-	setupAd	Configures the advertising unit.	
-Advertising	-	loadAd	Loads an ad to be displayed.	
-Advertising	-	displayAd	Displays a previously loaded ad.	
-Advertising	-	refreshAd	Refreshes an ad unit.	
-Widgets	-	showFunctionButtonWidget	Displays the Function Button Widget.	
-Widgets	-	showOAWidget	Displays the Official Account (OA) Widget.	
+This feature is only available for Zalo Mini App partners. For more information about solution partners, see [here](https://mini.zalo.me/solution-partner).
 
-Sources used in the report
+After successfully registering as a solution partner, please contact Zalo Mini App to receive an API Key and usage instructions.
 
-miniapp.zaloplatforms.com
-Opens in a new window
+### Document Structure [](/documents/open-apis/partner/#cấu-trúc-tài-liệu)
 
-Sources read but not used in the report
+1. [Open API Configuration Information](/documents/open-apis/partner/integration-process/)
+2. [Client Setup and API Integration Documentation](/documents/open-apis/partner/setup-client/)
+3. [Webhook Events](/documents/open-apis/partner/event-review-mini-app/)
+
+### Introduction
+
+zi-chevron-up
+
+miniapp-logo
+
+Explore
+----------------------------------------------------------------------------------------------------
+
+### Integration Process
+
+# Configuration Information
+
+When you become a solution partner, you will be provided with a pair of values, Partner API Key - Partner Id, to interact and use these APIs from your Server.
+
+Below are some accompanying information when you register to use OpenAPI for solution partners:
+
++ List of IP Access: List of IP Servers or Gateways you have registered to access these APIs.
++ Webhook Url: URL to receive notifications and data updates from Zalo Mini App.
++ Scopes (Range) of APIs you can interact with:
+
+  * apps.create: allows creating a Mini App.
+  * apps.getlist: allows retrieving the list of your Mini Apps.
+  * apps.deploy: allows deploying a new version of the Mini App to the Zalo system.
+  * apps.versions: retrieves the list of versions of the Mini App.
+  * apps.request.publish: allows sending a request to review the Mini App.
+  * apps.publish: allows publishing the Mini App.
+  * apps.request.permission: allows sending a request for permission.
+  * apps.get.stats: allows retrieving statistics of the Mini App.
+  * apps.get.payment.channels: allows retrieving the list of payment methods of the Mini App.
+  * apps.create.update.payment.channels: allows creating and updating payment methods of the Mini App.
+
+Note, all APIs have rate limits for each Zalo App, you can view detailed information in the API Management section.
+
+miniapp-logo
+
+Explore
+----------------------------------------------------------------------------------------------------
+
+### Setup Client
+
+# Setting up the Client | Zalo Mini App
+
+[Jump to main content](#__docusaurus_skipToContent_fallback)
+
+# Setting up the Client
+
+PartnerClient is the object that executes HTTP requests to OpenAPI, with common properties that rarely need to be changed for each request. The best approach is to make PartnerClient a static instance and set it up once for all requests.
+
+### PartnerClient [](https://mini.zalo.me/documents/open-apis/partner/setup-client/#partnerclient)
+
+#### Properties [](https://mini.zalo.me/documents/open-apis/partner/setup-client/#properties)
+
+| Property      | Type   | Description                                                                 |
+|---------------|--------|-----------------------------------------------------------------------------|
+| partnerId     | String | ID of the partner                                                          |
+| partnerApiKey | String | API Key corresponding to the partner used for authentication when calling Zalo Platform APIs |
+| proxy         |        | Configuration of host, port for the proxy intermediary of HTTP requests, defaults to no proxy usage |
+
+#### Sample Code [](https://mini.zalo.me/documents/open-apis/partner/setup-client/#sample-code)
+
+Code demo fallback when rendering server side!
+
+## Download Open API SDK [](https://mini.zalo.me/documents/open-apis/partner/setup-client/#tải-về-sdk-open-api)
+
+Sample install config
+
+```
+<dependency>
+  <groupId>com.vng.zalo</groupId>
+  <artifactId>zalo-miniapp-openapi-sdk</artifactId>
+  <version>2.2.1</version>
+  <scope>system</scope>
+  <systemPath>{your_path_to_file_sdk}</systemPath>
+</dependency>
+```
+
+### Setting up the Client
+
+zi-chevron-up
+
+miniapp-logo
+
+Explore
+----------------------------------------------------------------------------------------------------
+
+### Event Review Mini App
+
+# Event Review for Mini App
+
+Zalo will send HTTP POST requests to the Webhook URL of the application when there are changes related to the approval or rejection of the application's version.
+
+* URL: Webhook URL of the application
+* Method: POST
+* Headers: X-ZEvent-Signature (see the signature verification guide below)
+* Content-Type: application/json
+* Parameters:
+
+  | Parameter  | Data Type | Required | Value          | Description                              |
+  |------------|-----------|----------|----------------|------------------------------------------|
+  | event      | String    | Yes      | versions.review.done | Name of the event                       |
+  | appId      | String    | Yes      |                | Mini App ID                             |
+  | versionId  | Integer   | Yes      |                | ID of the version                       |
+  | status     | Integer   | Yes      | 0 or -1        | 0 - version approved, -1 version rejected |
+  | description| String    | Optional |                | Description of the reason for rejection  |
+  | timestamp  | Long      |          |                | Time of the event                       |
+
+Example:
+
+```
+{	
+    "event": "versions.review.done",	
+    "appId": "2646373759294038927",	
+    "versionId": 101,	
+    "status": 0,	
+    "description": "",	
+    "timestamp": 1670553442564
+}
+```
+
+miniapp-logo
+
+Explore
+----------------------------------------------------------------------------------------------------
+
+## App Management Introduction
+
+# Introduction | Zalo Mini App
+
+[Jump to content](#__docusaurus_skipToContent_fallback)
+
+# Introduction
+
+This document guides partners who need to automate the management and development of Mini Apps by integrating server-server APIs.
+
+During the trial phase, the feature is only available to certain partners. To use this feature, please contact [mini@zalo.me](mailto:mini@zalo.me) with your Zalo App ID and information about your business and product. We will review and evaluate to support you in using this feature.
+----------------------------------------------------------------------------------------------------
+
+## App Management V2 Introduction
+
+# Introduction | Zalo Mini App
+
+[Jump to content](#__docusaurus_skipToContent_fallback)
+
+# Introduction
+
+This document guides partners who need to automate the management and development of Mini Apps by integrating server-server APIs.
+
+This feature is only available to Zalo Mini App partners, for more information about solution partners [click here](https://mini.zalo.me/solution-partner).
+----------------------------------------------------------------------------------------------------
+
+## User Revocation of Consent and Data Deletion Events
+
+### Open Endpoint Version
+
+# User Revocation of Consent and Data Deletion Events | Zalo Mini App
+
+[Jump to main content](#__docusaurus_skipToContent_fallback)
+
+# User Revocation of Consent and Data Deletion Events
+
+Zalo will send HTTP POST requests to the Webhook URL of the application when there are changes related to users revoking consent and deleting data usage for Mini Apps.
+
+- URL: Webhook URL of the application
+- Method: POST
+- Headers: X-ZEvent-Signature (see signature verification guide below)
+- Content-Type: application/json
+- Parameters:
+
+| Parameter  | Data Type | Required | Value              | Description          |
+|------------|-----------|----------|--------------------|----------------------|
+| event      | String    | Yes      | user.revoke.consent | Name of the event    |
+| appId      | String    | Yes      |                    | Mini App ID          |
+| userId     | String    | Yes      |                    | User ID              |
+| timestamp  | Long      |          |                    | Time of the event    |
+
+Example:
+
+```
+{
+    "event": "user.revoke.consent",
+    "appId": "2646373759294038927",
+    "userId": "4047671499938107249",
+    "timestamp": 1670553442564
+}
+```
+
+miniapp-logo
+
+Explore
+----------------------------------------------------------------------------------------------------
+
+### Webhook Version
+
+# Event: User Revokes Consent and Deletes Data | Zalo Mini App
+
+[Jump to content](#__docusaurus_skipToContent_fallback)
+
+# Event: User Revokes Consent and Deletes Data
+
+**Note**
+
+To set up Webhook URL, please refer to the guide [here](https://mini.zalo.me/documents/open-apis/webhook/integration-webhook/).
+
+Zalo will send HTTP POST Requests to the application's Webhook URL when there are changes related to the user revoking consent and deleting data usage for the Mini App.
+
++ URL: Webhook URL of the application
++ Method: POST
++ Headers: X-ZEvent-Signature (see the signature verification guide below)
++ Content-Type: application/json
++ Parameters:
+
+| Parameter | Data Type | Required | Value | Description |
+|-----------|-----------|----------|-------|-------------|
+| event     | String    | Yes      | user.revoke.consent | Name of the event |
+| appId     | String    | Yes      |       | Mini App ID |
+| userId    | String    | Yes      |       | User ID |
+| timestamp | Long      |          |       | Time of the event |
+
+**Example**
+
+```
+{	"event": "user.revoke.consent",	"appId": "2646373759294038927",	"userId": "4047671499938107249",	"timestamp": 1670553442564}
+```
+
+## Additional Notes
+
+The documentation includes references to further sub-pages under app-management/v2/, such as creating Mini Apps, deploying versions, and listing banks, which can be explored at the respective URLs for more technical details. For complete implementation, registration as a partner is required to access API keys and advanced scopes.
