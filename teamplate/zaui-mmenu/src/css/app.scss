@@ -1,0 +1,214 @@
+:root {
+  --header-height: 44px;
+  --bottom-nav-height: 48px;
+
+  --color-ng-10: 247 247 248; // #F7F7F8
+  --color-gray-10: #F4F5F6;
+
+  --color-primary-rgb: 242 87 48; // #F25730
+  --color-primary: #F25730;
+  --color-primary-pressed: #BF4526;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #E9EBED;
+  --color-secondary-foreground: ##141415;
+  --color-inactive: #6F7071;
+  --color-inactive-foreground: #ffffff;
+  --color-border: #e5e5e5;
+  --color-text: #1E232E;
+  --color-text-secondary: #767A7F;
+  --color-text-subtle: #6F7071;
+  --color-divider: rgba(0, 0, 0, 0.05);
+  --color-background: #ffffff;
+  --zaui-light-button-tertiary-text: var(--color-primary);
+
+  --icon-clear: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQiIGhlaWdodD0iMTQiIHZpZXdCb3g9IjAgMCAxNCAxNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0wLjA5OTYwOTQgNi45OTk5OEMwLjA5OTYwOTQgMy4xODkyMSAzLjE4ODg0IDAuMDk5OTc1NiA2Ljk5OTYxIDAuMDk5OTc1NkMxMC44MTA0IDAuMDk5OTc1NiAxMy44OTk2IDMuMTg5MjEgMTMuODk5NiA2Ljk5OTk4QzEzLjg5OTYgMTAuODEwNyAxMC44MTA0IDEzLjkgNi45OTk2MSAxMy45QzMuMTg4ODQgMTMuOSAwLjA5OTYwOTQgMTAuODEwNyAwLjA5OTYwOTQgNi45OTk5OFpNNC4yNzUzNSA0LjI3NTcxQzQuNTA5NjYgNC4wNDE0IDQuODg5NTYgNC4wNDE0IDUuMTIzODcgNC4yNzU3MUw2Ljk5OTYxIDYuMTUxNDVMOC44NzUzNSA0LjI3NTcxQzkuMTA5NjYgNC4wNDE0IDkuNDg5NTYgNC4wNDE0IDkuNzIzODcgNC4yNzU3MUM5Ljk1ODE5IDQuNTEwMDMgOS45NTgxOSA0Ljg4OTkzIDkuNzIzODcgNS4xMjQyNEw3Ljg0ODE0IDYuOTk5OThMOS43MjM4NyA4Ljg3NTcxQzkuOTU4MTkgOS4xMTAwMyA5Ljk1ODE5IDkuNDg5OTMgOS43MjM4NyA5LjcyNDI0QzkuNDg5NTYgOS45NTg1NiA5LjEwOTY2IDkuOTU4NTYgOC44NzUzNSA5LjcyNDI0TDYuOTk5NjEgNy44NDg1TDUuMTIzODcgOS43MjQyNEM0Ljg4OTU2IDkuOTU4NTYgNC41MDk2NiA5Ljk1ODU2IDQuMjc1MzUgOS43MjQyNEM0LjA0MTAzIDkuNDg5OTMgNC4wNDEwMyA5LjExMDAzIDQuMjc1MzUgOC44NzU3MUw2LjE1MTA4IDYuOTk5OThMNC4yNzUzNSA1LjEyNDI0QzQuMDQxMDMgNC44ODk5MyA0LjA0MTAzIDQuNTEwMDMgNC4yNzUzNSA0LjI3NTcxWiIgZmlsbD0iIzUzNTc1QSIvPgo8L3N2Zz4K");
+}
+
+html, body {
+  background-color: #F7F8FA;
+  user-select: none;
+  --inset-top: var(--zaui-safe-area-inset-top, 0px);
+  --inset-bottom: var(--zaui-safe-area-inset-bottom, 0px);
+  color: var(--color-text)
+}
+
+.inset-top {
+  padding-top: var(--zaui-safe-area-inset-top, 0px);
+}
+
+.inset-bottom {
+  padding-bottom: var(--zaui-safe-area-inset-bottom, 0px);
+}
+
+.page-container {
+  --header-height: 0px;
+  --inset-top: var(--zaui-safe-area-inset-top, 0px);
+  padding-top: calc(var(--inset-top, 0px) + var(--header-height));
+}
+
+.with-header {
+  --header-height: 44px;
+}
+
+.with-bottom-nav {
+  --inset-bottom: var(--zaui-safe-area-inset-bottom, 0px);
+  padding-bottom: calc(var(--inset-bottom, 0px) + var(--bottom-nav-height));
+}
+
+.no-inset-top {
+  --inset-top: 0px;
+}
+
+.no-inset-bottom {
+  --inset-bottom: 0px;
+}
+
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.primary-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary) var(--color-primary);
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--color-primary);
+  }
+}
+
+// ZAUI Overrides
+.zaui-header-back {
+  // Tăng hitbox của nút back
+  // > Requester: Đức
+  width: 44px;
+  height: 44px;
+  margin-left: -10px;
+  margin-right: -10px;
+  
+  .zaui-btn-tertiary.zaui-btn-neutral {
+    color: #fff;
+
+    &:active, &:focus-visible {
+      background-color: transparent;
+    }
+  }
+}
+
+.zaui-bottom-navigation-item {
+  color: #6F7071;
+}
+.zaui-bottom-navigation-item-active {
+  color: var(--color-primary);
+}
+
+.zaui-btn-primary {
+  background-color: var(--color-primary);
+  
+  &:active, &:focus-visible {
+    background-color: var(--color-primary-pressed);
+  }
+}
+
+.zaui-snackbar-bottom {
+  bottom: calc(var(--zaui-safe-area-inset-bottom, 0px) + var(--bottom-nav-height) + 70px);
+}
+
+.zaui-header {
+  padding-right: 100px;
+
+  &.no-divider::after {
+    display: none;
+  }
+}
+
+// TODO: Xóa sau khi ZAUI fix
+.zaui-checkbox + span {
+  margin-left: 0px;
+}
+
+.zaui-checkbox-checked .zaui-checkbox-inner, .zaui-radio-checked .zaui-radio-checkmark {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.zaui-tabs.zaui-tabs-fluid {
+  .zaui-tabs-tabbar {
+    justify-content: center;
+  }
+  
+  .zaui-tabs-tabbar-item {
+    color: var(--color-text-subtle);
+    flex: 1 1 0%;
+    text-align: center;
+    max-width: 100%;
+    font-weight: 500;
+  }
+  .zaui-tabs-tabbar-item-active {
+    color: var(--color-primary);
+  }
+}
+
+.zaui-tabs-tabbar-active-line {
+  background-color: var(--color-primary);
+}
+
+.zaui-btn-small {
+  height: 34px;
+  padding: 7px 16px;
+}
+
+.zaui-btn-medium {
+  height: 42px;
+}
+
+.zaui-modal-title-left .zaui-modal-content-title {
+  text-align: left;
+}
+
+.zaui-modal-content-actions {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.zaui-list .zaui-list-item:not(:last-child) .zaui-list-item-right::after, .zaui-tabs-tabbar::after {
+  background-color: var(--color-divider);
+  height: 1px;
+}
+
+input[type="search"] {
+  ::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    height: 1em;
+    width: 1em;
+    padding-left: 8px;
+    padding-right: 8px;
+    border-radius: 50em;
+    background: var(--icon-clear) no-repeat 50% 50%;
+    background-size: contain;
+  }
+  &::placeholder {
+    color: #A9ADB2;
+  }
+  .dark {
+    &::placeholder {
+      color: black;
+    }
+  }
+}
+
+.zaui-spinner-ring {
+  background: radial-gradient(48.7% 48.7% at 18.91% 12.43%, #F25730 0%, rgba(242, 87, 48, 0) 100%);
+}
+
+.zaui-spinner-dot {
+  display: none
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
