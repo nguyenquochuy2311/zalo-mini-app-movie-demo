@@ -1,0 +1,19 @@
+{
+  "app": {
+    "title": "Index",
+    "textColor": "black",
+    "statusBar": "transparent",
+    "actionBarHidden": true,
+    "hideAndroidBottomNavigationBar": false,
+    "hideIOSSafeAreaBottom": false,
+    "selfControlLoading": false
+  },
+  "listCSS": [],
+  "listSyncJS": [
+    "/assets/app.js"
+  ],
+  "listAsyncJS": [],
+  "template": {
+    "name": "web"
+  }
+}
