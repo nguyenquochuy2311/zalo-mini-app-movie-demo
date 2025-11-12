@@ -1,0 +1,23 @@
+{
+  "app": {
+    "title": "Movie Tickets",
+    "textColor": "black",
+    "statusBar": "transparent",
+    "actionBarHidden": true,
+    "hideAndroidBottomNavigationBar": false,
+    "hideIOSSafeAreaBottom": false,
+    "selfControlLoading": false
+  },
+  "listCSS": [
+    "/assets/reset.css",
+    "/assets/styles.css",
+    "/assets/tokens.css"
+  ],
+  "listSyncJS": [
+    "/assets/app.js"
+  ],
+  "listAsyncJS": [],
+  "template": {
+    "name": "web"
+  }
+}

@@ -1,0 +1,1 @@
+export { routerInit, navigate } from './js/router.js';

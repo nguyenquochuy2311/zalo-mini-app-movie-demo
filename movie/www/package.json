@@ -1,0 +1,12 @@
+{
+  "name": "movie-www",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "start": "vite"
+  },
+  "devDependencies": {
+    "vite": "^2.9.16"
+  }
+}

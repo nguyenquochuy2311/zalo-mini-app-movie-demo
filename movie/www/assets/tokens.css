@@ -1,0 +1,36 @@
+/* Lightweight design tokens aligned to ZAUI principles (colors/spacing/typography) */
+:root {
+  /* Colors */
+  --color-brand-primary: #006AF5;
+  --color-text-primary: #141415;
+  --color-text-secondary: #5C5D60;
+  --color-bg: #FFFFFF;
+  --color-bg-muted: #F7F7F8;
+  --color-success: #28a745;
+  --color-danger: #dc3545;
+  --color-warning: #ff9f0a;
+  --color-gray-20: #EDEDEF;
+  --color-gray-40: #C9CACE;
+  --color-gray-60: #97989C;
+  --color-gray-80: #2B2C2F;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Radii */
+  --radius-1: 8px;
+  --radius-2: 12px;
+  --radius-round: 9999px;
+
+  /* Typography */
+  --font-size-h1: 22px; /* Header Normal */
+  --font-size-body: 15px; /* Body Normal */
+  --line-height-h1: 26px;
+  --line-height-body: 20px;
+}

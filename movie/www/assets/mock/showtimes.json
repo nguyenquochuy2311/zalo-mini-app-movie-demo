@@ -1,0 +1,5 @@
+[
+  { "id": "st1", "movieId": "m1", "time": "2025-11-12T17:00:00.000Z", "cinema": "District 1", "basePrice": 90000, "tierMultiplier": 1.2 },
+  { "id": "st2", "movieId": "m1", "time": "2025-11-12T20:00:00.000Z", "cinema": "District 3", "basePrice": 100000, "tierMultiplier": 1.0 },
+  { "id": "st3", "movieId": "m2", "time": "2025-11-13T18:30:00.000Z", "cinema": "District 7", "basePrice": 95000, "tierMultiplier": 1.1 }
+]
